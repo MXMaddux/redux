@@ -1,25 +1,27 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { createAccountAction } from "../../redux/slice/accounts/accountsSlice";
+import { useSelector, useDispatch } from "react-redux";
 
 const AddAccount = () => {
-  const [transaction, setTransaction] = useState({
-    title: "",
+  const dispatch = useDispatch();
+  const [account, setAccount] = useState({
+    name: "",
     initialBalance: "",
-    transactionType: "",
     notes: "",
     accountType: "",
   });
   //---Destructuring---
-  const { title, initialBalance, notes, accountType } = transaction;
+  const { name, initialBalance, notes, accountType } = account;
   //---onchange handler----
   const onChange = (e) => {
-    setTransaction({ ...transaction, [e.target.name]: e.target.value });
+    setAccount({ ...account, [e.target.name]: e.target.value });
   };
 
   //---onsubmit handler----
   const onSubmit = (e) => {
     e.preventDefault();
-    console.log(transaction);
+    dispatch(createAccountAction(account));
   };
   return (
     <section className="py-16 xl:pb-56 bg-white overflow-hidden">
@@ -34,13 +36,13 @@ const AddAccount = () => {
           <form onSubmit={onSubmit}>
             <label className="block mb-5">
               <input
-                value={title}
+                value={name}
                 onChange={onChange}
-                name="title"
+                name="name"
                 className="px-4 py-3.5 w-full text-gray-500 font-medium placeholder-gray-500 bg-white outline-none border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300"
                 id="signUpInput2-1"
                 type="text"
-                placeholder="Enter Title"
+                placeholder="Enter Name"
               />
             </label>
             <label className="block mb-5">
@@ -67,7 +69,7 @@ const AddAccount = () => {
                 <option value="Investment">Investment</option>
                 <option value="Checking">Checking</option>
                 <option value="Credit Card">Credit Card</option>
-                <option value="Builing">Builing</option>
+                <option value="Building">Building</option>
                 <option value="School">School</option>
                 <option value="Project">Project</option>
                 <option value="Utilities">Utilities</option>

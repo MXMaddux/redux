@@ -1,8 +1,21 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import TransactionList from "./TransactionList";
+import { getSingleAccountAction } from "../../redux/slice/accounts/accountsSlice";
 
 const AccountDetails = () => {
+  // Get id
+  const { id } = useParams();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getSingleAccountAction(id));
+  }, [id]);
+
+  const { account, loading, error } = useSelector((state) => state?.accounts);
+  console.log(account);
+
   return (
     <>
       {/* Account Summary */}
