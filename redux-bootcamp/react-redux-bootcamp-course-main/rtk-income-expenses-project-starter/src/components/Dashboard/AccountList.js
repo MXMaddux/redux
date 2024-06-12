@@ -44,8 +44,8 @@ const AccountList = ({ profile: { accounts } }) => {
               Add New Account
             </Link>
             {/* Loop */}
-            {accounts?.map((account) => (
-              <div className="flex flex-wrap -mx-4">
+            {accounts?.map((account, index) => (
+              <div key={index} className="flex flex-wrap -mx-4">
                 <div className="w-full md:w-1/2 px-4 mb-8">
                   <a className="group" href="#">
                     <div className="bg-coolGray-50 group-hover:bg-coolGray-100 rounded-md shadow-md transition duration-200">

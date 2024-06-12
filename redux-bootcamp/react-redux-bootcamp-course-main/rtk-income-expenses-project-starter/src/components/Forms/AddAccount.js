@@ -1,10 +1,11 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { createAccountAction } from "../../redux/slice/accounts/accountsSlice";
 import { useSelector, useDispatch } from "react-redux";
 
 const AddAccount = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [account, setAccount] = useState({
     name: "",
     initialBalance: "",
@@ -18,11 +19,31 @@ const AddAccount = () => {
     setAccount({ ...account, [e.target.name]: e.target.value });
   };
 
+  // Get store data
+  const {
+    account: accountCreated,
+    loading,
+    error,
+    success,
+  } = useSelector((state) => state?.accounts);
+
   //---onsubmit handler----
   const onSubmit = (e) => {
     e.preventDefault();
     dispatch(createAccountAction(account));
   };
+
+  // Redirect after 3 seconds
+  useEffect(() => {
+    setTimeout(() => {
+      if (success) {
+        navigate("/dashboard");
+        // reload the page
+        window.location.reload();
+      }
+    }, 3000);
+  }, [success]);
+
   return (
     <section className="py-16 xl:pb-56 bg-white overflow-hidden">
       <div className="container px-4 mx-auto">
@@ -33,6 +54,12 @@ const AddAccount = () => {
           <p className="mb-12 font-medium text-lg text-gray-600 leading-normal">
             Create an account(Project) to start tracking your transactions
           </p>
+          {/* error */}
+          {error && (
+            <p className="mb-3 font-medium text-lg text-red-600 leading-normal">
+              {error}
+            </p>
+          )}
           <form onSubmit={onSubmit}>
             <label className="block mb-5">
               <input
@@ -97,12 +124,21 @@ const AddAccount = () => {
                 />
               </div>
             </div>
-            <button
-              type="submit"
-              className="mb-8 py-4 px-9 w-full text-white font-semibold border border-indigo-700 rounded-xl shadow-4xl focus:ring focus:ring-indigo-300 bg-indigo-600 hover:bg-indigo-700 transition ease-in-out duration-200"
-            >
-              Create Account
-            </button>
+            {loading ? (
+              <button
+                disabled
+                className="mb-8 py-4 px-9 w-full text-white font-semibold border border-indigo-700 rounded-xl shadow-4xl focus:ring focus:ring-indigo-300 bg-gray-600 hover:bg-indigo-700 transition ease-in-out duration-200"
+              >
+                Loading...
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="mb-8 py-4 px-9 w-full text-white font-semibold border border-indigo-700 rounded-xl shadow-4xl focus:ring focus:ring-indigo-300 bg-indigo-600 hover:bg-indigo-700 transition ease-in-out duration-200"
+              >
+                Create Account
+              </button>
+            )}
             {/* <p className="font-medium">
               <span>Already have an account?</span>
               <a className="text-indigo-600 hover:text-indigo-700" href="#">

@@ -1,22 +1,21 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import baseURL from "../../../utils/baseURL";
-// const baseURL =
-//   "https://income-expenses-tracker-web-dev.onrender.com/api/v1/accounts";
 
 const initialState = {
-  account: {},
-  accounts: [],
+  transactions: [],
+  transaction: {},
   loading: false,
   error: null,
-  success: false,
+  isAdded: false,
   isUpdated: false,
 };
 
-// Action to create a new account/project
-export const createAccountAction = createAsyncThunk(
-  "account/create",
+// create transaction
+export const createTransactionAction = createAsyncThunk(
+  "transaction/create",
   async (payload, { rejectWithValue, getState, dispatch }) => {
+    const { name, account, transactionType, amount, category, notes } = payload;
     try {
       // Get the token
       const token = getState()?.users?.userAuth?.userInfo?.token;
@@ -28,12 +27,14 @@ export const createAccountAction = createAsyncThunk(
       };
       // Make request
       const { data } = await axios.post(
-        `${baseURL}/accounts`,
+        `${baseURL}/transactions`,
         {
-          name: payload.name,
-          accountType: payload.accountType,
-          notes: payload.notes,
-          initialBalance: payload.initialBalance,
+          name,
+          transactionType,
+          amount,
+          category,
+          notes,
+          account: payload.id,
         },
         config
       );
@@ -44,11 +45,11 @@ export const createAccountAction = createAsyncThunk(
   }
 );
 
-// Action to create a new account/project
-export const updateAccountAction = createAsyncThunk(
-  "account/update",
+// update transaction
+export const updateTransactionAction = createAsyncThunk(
+  "transaction/update",
   async (payload, { rejectWithValue, getState, dispatch }) => {
-    const { id, name, accountType, notes, initialBalance } = payload;
+    const { name, transactionType, amount, category, notes, id } = payload;
     try {
       // Get the token
       const token = getState()?.users?.userAuth?.userInfo?.token;
@@ -60,15 +61,18 @@ export const updateAccountAction = createAsyncThunk(
       };
       // Make request
       const { data } = await axios.put(
-        `${baseURL}/accounts/${payload.id}`,
+        `${baseURL}/transactions/${id}`,
         {
           name,
-          accountType,
+          transactionType,
+          amount,
+          category,
           notes,
-          initialBalance,
+          id,
         },
         config
       );
+      console.log(data);
       return data;
     } catch (error) {
       return rejectWithValue(error?.response?.data);
@@ -76,10 +80,11 @@ export const updateAccountAction = createAsyncThunk(
   }
 );
 
-// Get single account
-export const getSingleAccountAction = createAsyncThunk(
-  "account/get-details",
-  async (id, { rejectWithValue, getState, dispatch }) => {
+// fetch transaction
+export const getTransactionAction = createAsyncThunk(
+  "transaction/details",
+  async (payload, { rejectWithValue, getState, dispatch }) => {
+    const { id } = payload;
     try {
       // Get the token
       const token = getState()?.users?.userAuth?.userInfo?.token;
@@ -90,7 +95,7 @@ export const getSingleAccountAction = createAsyncThunk(
         },
       };
       // Make request
-      const { data } = await axios.get(`${baseURL}/accounts/${id}`, config);
+      const { data } = await axios.get(`${baseURL}/transactions/${id}`, config);
       return data;
     } catch (error) {
       return rejectWithValue(error?.response?.data);
@@ -98,9 +103,8 @@ export const getSingleAccountAction = createAsyncThunk(
   }
 );
 
-// Create Slice
-const accountsSlice = createSlice({
-  name: "accounts",
+const transactionsSlice = createSlice({
+  name: "transactions",
   initialState,
   reducers: {
     // Logout
@@ -110,58 +114,55 @@ const accountsSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Create Account
-    builder.addCase(createAccountAction.pending, (state) => {
+    // Create Transaction
+    builder.addCase(createTransactionAction.pending, (state) => {
       state.loading = true;
     });
-    builder.addCase(createAccountAction.fulfilled, (state, action) => {
+    builder.addCase(createTransactionAction.fulfilled, (state, action) => {
       state.loading = false;
-      state.success = true;
-      state.account = action.payload;
+      state.isAdded = true;
+      state.transaction = action.payload;
       //   state.accounts.push(action.payload);
     });
-    builder.addCase(createAccountAction.rejected, (state, action) => {
+    builder.addCase(createTransactionAction.rejected, (state, action) => {
       state.loading = false;
-      state.success = false;
-      state.account = null;
+      state.isAdded = false;
+      state.transaction = null;
       state.error = action.payload;
     });
-    // fetch single account
-    builder.addCase(getSingleAccountAction.pending, (state) => {
+    // Update Transaction
+    builder.addCase(updateTransactionAction.pending, (state) => {
       state.loading = true;
     });
-    builder.addCase(getSingleAccountAction.fulfilled, (state, action) => {
+    builder.addCase(updateTransactionAction.fulfilled, (state, action) => {
       state.loading = false;
-      state.success = true;
-      state.account = action.payload;
-    });
-    builder.addCase(getSingleAccountAction.rejected, (state, action) => {
-      state.loading = false;
-      state.success = false;
-      state.account = null;
-      state.error = action.payload;
-    });
-    // Update Account
-    builder.addCase(updateAccountAction.pending, (state) => {
-      state.loading = true;
-    });
-    builder.addCase(updateAccountAction.fulfilled, (state, action) => {
-      state.loading = false;
-      state.success = true;
       state.isUpdated = true;
-      state.account = action.payload;
+      state.transaction = action.payload;
+      //   state.accounts.push(action.payload);
     });
-    builder.addCase(updateAccountAction.rejected, (state, action) => {
+    builder.addCase(updateTransactionAction.rejected, (state, action) => {
       state.loading = false;
-      state.success = false;
-      state.account = null;
-      state.error = action.payload;
       state.isUpdated = false;
+      state.transaction = null;
+      state.error = action.payload;
+    });
+    // Get Transaction
+    builder.addCase(getTransactionAction.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(getTransactionAction.fulfilled, (state, action) => {
+      state.loading = false;
+      state.transaction = action.payload;
+    });
+    builder.addCase(getTransactionAction.rejected, (state, action) => {
+      state.loading = false;
+      state.transaction = null;
+      state.error = action.payload;
     });
   },
 });
 
 // Generate reducer
-const accountsReducer = accountsSlice.reducer;
+const transactionsReducer = transactionsSlice.reducer;
 
-export default accountsReducer;
+export default transactionsReducer;
